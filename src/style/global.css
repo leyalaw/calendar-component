@@ -1,1 +1,9 @@
 @import "./reset.css";
+
+html {
+  font-size: 10px;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
