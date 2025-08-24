@@ -74,7 +74,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1rem;
+  padding: 0.8rem;
   font-size: 1.2rem;
 }
 
@@ -83,6 +83,14 @@ export default {
   border-top: 0.5rem solid transparent;
   border-bottom: 0.5rem solid transparent;
   border-right: 0.8rem solid currentColor;
+}
+
+.base-calendar-header__month-button {
+  padding: 0.2rem;
+}
+
+.base-calendar-header__month-button:hover {
+  color: var(--active-color);
 }
 
 .base-calendar-header__month-button--next > * {

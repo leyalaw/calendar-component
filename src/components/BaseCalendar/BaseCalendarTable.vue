@@ -196,7 +196,15 @@ export default {
   color: #ccc;
 }
 
+.base-calendar-table__day:hover:not(:disabled):not(
+    .base-calendar-table__day--selected
+  ) {
+  background-color: var(--active-color);
+  color: var(--background-color);
+}
+
 .base-calendar-table__day--selected {
-  outline: 1px solid #44bbdd;
+  outline: 1px solid var(--active-color);
+  cursor: default;
 }
 </style>

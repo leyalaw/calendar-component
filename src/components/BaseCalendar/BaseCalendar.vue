@@ -89,8 +89,12 @@ export default {
 <style scoped>
 /* ---------------------------------- Style --------------------------------- */
 .base-calendar {
+  --background-color: #fff;
+  --active-color: #44bbdd;
+
   width: 24rem;
   border: 1px solid #ccc;
+  background-color: var(--background-color);
   text-align: center;
   color: #333;
 }
