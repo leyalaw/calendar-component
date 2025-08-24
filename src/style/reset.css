@@ -21,8 +21,7 @@ textarea {
   border: none;
 }
 
-button,
-select {
+:is(button, select):not(:disabled) {
   cursor: pointer;
 }
 
