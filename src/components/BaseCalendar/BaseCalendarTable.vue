@@ -14,21 +14,22 @@
     </thead>
 
     <!-- Таблица дней -->
-    <!-- <tbody>
+    <tbody>
       <tr v-for="week in weeks" :key="week">
-        <td v-for="day in week" :key="day">
+        <td v-for="dayDate in week" :key="dayDate">
           <button
             type="button"
             class="base-calendar-table__day"
             :class="{
-              'base-calendar-table__day--selected': day === selectedDay,
+              'base-calendar-table__day--selected': isSelectedDay(dayDate),
             }"
+            :disabled="isDisabledDay(dayDate)"
           >
-            {{ day }}
+            {{ dayDate.getDate() }}
           </button>
         </td>
       </tr>
-    </tbody> -->
+    </tbody>
   </table>
 </template>
 
@@ -41,6 +42,11 @@
 const MONDAY_DATE = Object.freeze(new Date(2025, 7, 4));
 /** Количество дней в неделе */
 const WEEKDAYS_AMOUNT = 7;
+/** Максимальный и минимальный ваозможный индекс последней недели */
+const LAST_WEEK_INDEX = Object.freeze({
+  MAX: 5,
+  MIN: 3,
+});
 /** Коды локалей, в которых неделя начинается с воскресенья */
 const SUNDAY_WEEK_LOCALES = ["en-US", "en-CA", "en-GB"]; // TODO: список неполный
 
@@ -64,22 +70,15 @@ export default {
       default: "en-US",
     },
   },
-  /* ---------------------------------- Data ---------------------------------- */
-  data() {
-    return {
-      /** Количество дней в месяце */
-      daysAmount: 31,
-      /** Максимально возможное количество недель в месяце */
-      maxWeeksAmount: 6,
-      /** Выбранный день */
-      selectedDay: 10,
-    };
-  },
   /* -------------------------------- Computed -------------------------------- */
   computed: {
     /** флаг календаря, в котором неделя начинается с воскресенья */
     isSundayWeek() {
       return SUNDAY_WEEK_LOCALES.includes(this.locale);
+    },
+    /** Индекс текущего месяца */
+    currentMonthIndex() {
+      return this.currentMonthDate.getMonth();
     },
     /** Форматтер сокращённых названий дней недели */
     weekdayFormatter() {
@@ -103,30 +102,69 @@ export default {
 
       return weekdays;
     },
-    /** Дни, сгруппированные по неделям */
+    /** Дата первого дня месяца */
+    firstMonthDayDate() {
+      const date = new Date(this.currentMonthDate);
+      date.setDate(1);
+      return date;
+    },
+    /** Индекс первого дня месяца */
+    firstMonthWeekdayIndex() {
+      const mondayWeekCorrection = +!this.isSundayWeek;
+      return this.firstMonthDayDate.getDay() - mondayWeekCorrection;
+    },
+    lastMonthDayNumber() {
+      const date = new Date(this.currentMonthDate);
+      date.setMonth(date.getMonth() + 1);
+      date.setDate(0);
+      return date.getDate();
+    },
+    /** Даты дней, сгруппированные по неделям */
     weeks() {
       const weeks = [];
 
-      let dayNumber = 1;
+      let daysFromFirst = 0;
 
-      for (let weekIndex = 0; weekIndex < this.maxWeeksAmount; weekIndex++) {
-        if (dayNumber > this.daysAmount) break;
-
+      for (let weekIndex = 0; weekIndex <= LAST_WEEK_INDEX.MAX; weekIndex++) {
         const week = [];
+
+        const isFirstWeek = weekIndex === 0;
+        const isPossiblyLastWeek = weekIndex >= LAST_WEEK_INDEX.MIN;
 
         for (
           let weekdayIndex = 0;
-          weekdayIndex < this.weekdaysAmount;
+          weekdayIndex < WEEKDAYS_AMOUNT;
           weekdayIndex++
         ) {
-          week.push(dayNumber++);
-          if (dayNumber > this.daysAmount) break;
+          const date = new Date(this.firstMonthDayDate);
+
+          const day =
+            isFirstWeek && weekdayIndex < this.firstMonthWeekdayIndex
+              ? date.getDate() - this.firstMonthWeekdayIndex + weekdayIndex
+              : date.getDate() + daysFromFirst++;
+
+          date.setDate(day);
+          week.push(date);
         }
 
         weeks.push(week);
+
+        if (isPossiblyLastWeek && daysFromFirst >= this.lastMonthDayNumber)
+          break;
       }
 
       return weeks;
+    },
+  },
+  /* --------------------------------- Methods -------------------------------- */
+  methods: {
+    /** Флаг выбранного дня */
+    isSelectedDay(dayDate) {
+      return dayDate.toDateString() === this.selectedDayDate.toDateString();
+    },
+    /** Флаг дня соседнего месяца */
+    isDisabledDay(dayDate) {
+      return dayDate.getMonth() !== this.currentMonthIndex;
     },
   },
 };
@@ -152,6 +190,10 @@ export default {
 .base-calendar-table__day {
   width: 100%;
   font-size: 1.5rem;
+}
+
+.base-calendar-table__day:disabled {
+  color: #ccc;
 }
 
 .base-calendar-table__day--selected {
