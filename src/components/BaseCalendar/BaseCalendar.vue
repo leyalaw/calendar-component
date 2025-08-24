@@ -1,15 +1,18 @@
 <template>
   <section v-if="currentMonthDate" class="base-calendar">
+    <!-- Заголовок календаря -->
     <BaseCalendarHeader
       :date="currentMonthDate"
       :locale="locale"
       @click-previous="goToMonth('previous')"
       @click-next="goToMonth('next')"
     />
+    <!-- Таблица дней месяца -->
     <BaseCalendarTable
       :current-month-date="currentMonthDate"
       :selected-day-date="selectedDayDate"
       :locale="locale"
+      @click-day="selectDay"
     />
   </section>
 </template>
@@ -28,6 +31,8 @@ export default {
     BaseCalendarHeader,
     BaseCalendarTable,
   },
+  /* ---------------------------------- Emits --------------------------------- */
+  emits: ["select"],
   /* ---------------------------------- Props --------------------------------- */
   props: {
     /**
@@ -58,7 +63,9 @@ export default {
   /* ---------------------------------- Data ---------------------------------- */
   data() {
     return {
+      /** Дата выбранного дня */
       selectedDayDate: null,
+      /** Дата отображаемого месяца */
       currentMonthDate: null,
     };
   },
@@ -66,14 +73,32 @@ export default {
   mounted() {
     this.setInitialDate();
   },
+  /* ---------------------------------- Watch --------------------------------- */
+  watch: {
+    initialDateString() {
+      this.setInitialDate();
+    },
+    selectedDayDate() {
+      this.$emit("select", this.selectedDayDate);
+    },
+  },
   /* --------------------------------- Methods -------------------------------- */
   methods: {
+    /** Переключение месяца */
     goToMonth(direction) {
       const monthChange = direction === "previous" ? -1 : 1;
       const date = new Date(this.currentMonthDate);
       date.setMonth(date.getMonth() + monthChange);
       this.currentMonthDate = date;
     },
+    /** Выбор дня */
+    selectDay(date) {
+      this.selectedDayDate = date;
+    },
+    /**
+     * Установка начальных значений дат выбранного дня
+     * и отображаемого месяца
+     */
     setInitialDate() {
       const initialDate = this.initialDateString
         ? new Date(this.initialDateString)

@@ -24,6 +24,7 @@
               'base-calendar-table__day--selected': isSelectedDay(dayDate),
             }"
             :disabled="isDisabledDay(dayDate)"
+            @click="$emit('click-day', dayDate)"
           >
             {{ dayDate.getDate() }}
           </button>
