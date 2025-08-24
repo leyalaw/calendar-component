@@ -3,6 +3,7 @@
     <!-- Предыдущий месяц -->
     <button
       type="button"
+      @click="$emit('click-previous')"
       class="base-calendar-header__month-button base-calendar-header__month-button--previous"
     >
       <!-- стрелка влево -->
@@ -11,13 +12,18 @@
 
     <!-- Месяц и год -->
     <div class="base-calendar-header__title">
-      <span class="base-calendar-header__month">Jul</span>
-      <span class="base-calendar-header__year">2018</span>
+      <span class="base-calendar-header__month">
+        {{ month }}
+      </span>
+      <span class="base-calendar-header__year">
+        {{ year }}
+      </span>
     </div>
 
     <!-- Следующий месяц -->
     <button
       type="button"
+      @click="$emit('click-next')"
       class="base-calendar-header__month-button base-calendar-header__month-button--next"
     >
       <!-- стрелка вправо -->
@@ -27,12 +33,43 @@
 </template>
 
 <script>
+/* -------------------------------------------------------------------------- */
+/*                               Хедер календаря                              */
+/* -------------------------------------------------------------------------- */
+
 export default {
   name: "BaseCalendarHeader",
+  /* ---------------------------------- Emits --------------------------------- */
+  emits: ["click-previous", "click-next"],
+  /* ---------------------------------- Props --------------------------------- */
+  props: {
+    /** Дата отображаемого месяца */
+    date: {
+      type: Date,
+      required: true,
+    },
+    /** Код локали (по умолчанию en-US) */
+    locale: {
+      type: String,
+      default: "en-US",
+    },
+  },
+  /* -------------------------------- Computed -------------------------------- */
+  computed: {
+    /** Сокращённое название месяца */
+    month() {
+      return this.date.toLocaleString(this.locale, { month: "short" });
+    },
+    /** Год в формате YYYY */
+    year() {
+      return this.date.getFullYear();
+    },
+  },
 };
 </script>
 
 <style scoped>
+/* ---------------------------------- Style --------------------------------- */
 .base-calendar-header {
   display: flex;
   align-items: center;
