@@ -14,7 +14,7 @@
     </thead>
 
     <!-- Таблица дней -->
-    <tbody>
+    <!-- <tbody>
       <tr v-for="week in weeks" :key="week">
         <td v-for="day in week" :key="day">
           <button
@@ -28,17 +28,45 @@
           </button>
         </td>
       </tr>
-    </tbody>
+    </tbody> -->
   </table>
 </template>
 
 <script>
+/* -------------------------------------------------------------------------- */
+/*                           Таблица дней календаря                           */
+/* -------------------------------------------------------------------------- */
+
+/** Дата понедельника, взятая за основу */
+const MONDAY_DATE = Object.freeze(new Date(2025, 7, 4));
+/** Количество дней в неделе */
+const WEEKDAYS_AMOUNT = 7;
+/** Коды локалей, в которых неделя начинается с воскресенья */
+const SUNDAY_WEEK_LOCALES = ["en-US", "en-CA", "en-GB"]; // TODO: список неполный
+
 export default {
   name: "BaseCalendarTable",
+  /* ---------------------------------- Props --------------------------------- */
+  props: {
+    /** Дата отображаемого месяца */
+    currentMonthDate: {
+      type: Date,
+      required: true,
+    },
+    /** Дата выбранного дня */
+    selectedDayDate: {
+      type: Date,
+      required: true,
+    },
+    /** Код локали (по умолчанию en-US) */
+    locale: {
+      type: String,
+      default: "en-US",
+    },
+  },
+  /* ---------------------------------- Data ---------------------------------- */
   data() {
     return {
-      /** Наименования дней недели */
-      weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
       /** Количество дней в месяце */
       daysAmount: 31,
       /** Максимально возможное количество недель в месяце */
@@ -47,10 +75,33 @@ export default {
       selectedDay: 10,
     };
   },
+  /* -------------------------------- Computed -------------------------------- */
   computed: {
-    /** Количество дней в неделе */
-    weekdaysAmount() {
-      return this.weekdays.length;
+    /** флаг календаря, в котором неделя начинается с воскресенья */
+    isSundayWeek() {
+      return SUNDAY_WEEK_LOCALES.includes(this.locale);
+    },
+    /** Форматтер сокращённых названий дней недели */
+    weekdayFormatter() {
+      return new Intl.DateTimeFormat(this.locale, { weekday: "short" });
+    },
+    /** Сокращённые наименования дней недели */
+    weekdays() {
+      const weekdays = [];
+
+      const sundayWeekCorrection = +this.isSundayWeek;
+
+      for (
+        let daysFromMonday = 0;
+        daysFromMonday < WEEKDAYS_AMOUNT;
+        daysFromMonday++
+      ) {
+        const date = new Date(MONDAY_DATE);
+        date.setDate(date.getDate() + daysFromMonday - sundayWeekCorrection);
+        weekdays.push(this.weekdayFormatter.format(date));
+      }
+
+      return weekdays;
     },
     /** Дни, сгруппированные по неделям */
     weeks() {
@@ -82,6 +133,7 @@ export default {
 </script>
 
 <style scoped>
+/* ---------------------------------- Style --------------------------------- */
 .base-calendar-table {
   width: 100%;
 }

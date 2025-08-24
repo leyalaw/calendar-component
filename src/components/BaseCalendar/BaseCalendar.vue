@@ -1,13 +1,16 @@
 <template>
-  <section class="base-calendar">
+  <section v-if="currentMonthDate" class="base-calendar">
     <BaseCalendarHeader
-      v-if="currentMonthDate"
       :date="currentMonthDate"
       :locale="locale"
       @click-previous="goToMonth('previous')"
       @click-next="goToMonth('next')"
     />
-    <BaseCalendarTable />
+    <BaseCalendarTable
+      :current-month-date="currentMonthDate"
+      :selected-day-date="selectedDayDate"
+      :locale="locale"
+    />
   </section>
 </template>
 
@@ -75,8 +78,6 @@ export default {
       const initialDate = this.initialDateString
         ? new Date(this.initialDateString)
         : new Date();
-
-      console.log(initialDate);
 
       this.selectedDayDate = initialDate;
       this.currentMonthDate = initialDate;
