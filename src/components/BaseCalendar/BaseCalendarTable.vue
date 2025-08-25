@@ -16,9 +16,10 @@
 
     <!-- Таблица дней -->
     <tbody>
-      <tr v-for="week in weeks" :key="week">
-        <td v-for="dayDate in week" :key="dayDate">
+      <tr v-for="(week, weekIndex) in weeks" :key="week">
+        <td v-for="(dayDate, weekdayIndex) in week" :key="dayDate">
           <button
+            ref="dayButtons"
             type="button"
             :disabled="isDisabledDay(dayDate)"
             :tabindex="getTabIndex(dayDate)"
@@ -28,6 +29,9 @@
               'base-calendar-table__day--selected': isSelectedDay(dayDate),
             }"
             @click="$emit('click-day', dayDate)"
+            @keydown="
+              focusNearDay($event, getDayIndex({ weekIndex, weekdayIndex }))
+            "
           >
             {{ dayDate.getDate() }}
           </button>
@@ -191,6 +195,31 @@ export default {
           dayDate.getDate() === 1)
         ? 0
         : -1;
+    },
+    /** Индекс дня в таблице */
+    getDayIndex({ weekIndex, weekdayIndex }) {
+      return weekIndex * WEEKDAYS_AMOUNT + weekdayIndex;
+    },
+    /** Фокус с клавиатуры */
+    focusNearDay(event, dayIndex) {
+      let move = 0;
+
+      switch (event.key) {
+        case "ArrowLeft":
+          move = -1;
+          break;
+        case "ArrowRight":
+          move = 1;
+          break;
+        case "ArrowUp":
+          move = -WEEKDAYS_AMOUNT;
+          break;
+        case "ArrowDown":
+          move = WEEKDAYS_AMOUNT;
+          break;
+      }
+
+      this.$refs.dayButtons[dayIndex + move].focus();
     },
   },
 };
