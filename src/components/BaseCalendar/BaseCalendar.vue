@@ -2,10 +2,10 @@
   <section v-if="currentMonthDate" class="base-calendar">
     <!-- Заголовок календаря -->
     <BaseCalendarHeader
-      :date="currentMonthDate"
+      :current-month-date="currentMonthDate"
       :locale="locale"
-      @click-previous="goToMonth('previous')"
-      @click-next="goToMonth('next')"
+      @click-previous="currentMonthDate = $event"
+      @click-next="currentMonthDate = $event"
     />
     <!-- Таблица дней месяца -->
     <BaseCalendarTable
@@ -84,13 +84,6 @@ export default {
   },
   /* --------------------------------- Methods -------------------------------- */
   methods: {
-    /** Переключение месяца */
-    goToMonth(direction) {
-      const monthChange = direction === "previous" ? -1 : 1;
-      const date = new Date(this.currentMonthDate);
-      date.setMonth(date.getMonth() + monthChange);
-      this.currentMonthDate = date;
-    },
     /** Выбор дня */
     selectDay(date) {
       this.selectedDayDate = date;

@@ -1,9 +1,10 @@
 <template>
-  <header class="base-calendar-header">
+  <header :aria-label="currentFullName" class="base-calendar-header">
     <!-- Предыдущий месяц -->
     <button
       type="button"
-      @click="$emit('click-previous')"
+      :aria-label="previousLongMonth"
+      @click="$emit('click-previous', previousMonthDate)"
       class="base-calendar-header__month-button base-calendar-header__month-button--previous"
     >
       <!-- стрелка влево -->
@@ -11,19 +12,25 @@
     </button>
 
     <!-- Месяц и год -->
-    <div class="base-calendar-header__title">
-      <span class="base-calendar-header__month">
-        {{ month }}
+    <div
+      tabindex="0"
+      :aria-label="currentFullName"
+      aria-live="assertive"
+      class="base-calendar-header__title"
+    >
+      <span aria-hidden="true" class="base-calendar-header__month">
+        {{ currentMonth.short }}
       </span>
-      <span class="base-calendar-header__year">
-        {{ year }}
+      <span aria-hidden="true" class="base-calendar-header__year">
+        {{ currentYear }}
       </span>
     </div>
 
     <!-- Следующий месяц -->
     <button
       type="button"
-      @click="$emit('click-next')"
+      :aria-label="nextLongMonth"
+      @click="$emit('click-next', nextMonthDate)"
       class="base-calendar-header__month-button base-calendar-header__month-button--next"
     >
       <!-- стрелка вправо -->
@@ -44,7 +51,7 @@ export default {
   /* ---------------------------------- Props --------------------------------- */
   props: {
     /** Дата отображаемого месяца */
-    date: {
+    currentMonthDate: {
       type: Date,
       required: true,
     },
@@ -56,13 +63,52 @@ export default {
   },
   /* -------------------------------- Computed -------------------------------- */
   computed: {
-    /** Сокращённое название месяца */
-    month() {
-      return this.date.toLocaleString(this.locale, { month: "short" });
+    /** Форматтер сокращённых названий месяцев */
+    monthShortFormatter() {
+      return new Intl.DateTimeFormat(this.locale, { month: "short" });
+    },
+    /** Форматтер полных названий месяцев */
+    monthLongFormatter() {
+      return new Intl.DateTimeFormat(this.locale, { month: "long" });
+    },
+    /** Дата предыдущего месяца */
+    previousMonthDate() {
+      return this.getNearMonth("previous");
+    },
+    /** Дата следующего месяца */
+    nextMonthDate() {
+      return this.getNearMonth("next");
+    },
+    /** Названия отображаемого месяца */
+    currentMonth() {
+      return {
+        short: this.monthShortFormatter.format(this.currentMonthDate),
+        long: this.monthLongFormatter.format(this.currentMonthDate),
+      };
+    },
+    /** Полное название предыдущего месяцев */
+    previousLongMonth() {
+      return this.monthLongFormatter.format(this.previousMonthDate);
+    },
+    /** Полное название следующего месяцев */
+    nextLongMonth() {
+      return this.monthLongFormatter.format(this.nextMonthDate);
     },
     /** Год в формате YYYY */
-    year() {
-      return this.date.getFullYear();
+    currentYear() {
+      return this.currentMonthDate.getFullYear();
+    },
+    /** Полное название отображаемых месяца и года */
+    currentFullName() {
+      return `${this.currentMonth.long} ${this.currentYear}`;
+    },
+  },
+  methods: {
+    getNearMonth(direction) {
+      const monthChange = direction === "previous" ? -1 : 1;
+      const date = new Date(this.currentMonthDate);
+      date.setMonth(date.getMonth() + monthChange);
+      return date;
     },
   },
 };

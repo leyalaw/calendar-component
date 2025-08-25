@@ -5,10 +5,11 @@
       <tr>
         <th
           v-for="weekday in weekdays"
-          :key="weekday"
+          :key="weekday.short"
+          :aria-label="weekday.long"
           class="base-calendar-table__weekday"
         >
-          {{ weekday }}
+          <span aria-hidden="true">{{ weekday.short }}</span>
         </th>
       </tr>
     </thead>
@@ -19,11 +20,13 @@
         <td v-for="dayDate in week" :key="dayDate">
           <button
             type="button"
+            :disabled="isDisabledDay(dayDate)"
+            :tabindex="getTabIndex(dayDate)"
+            :aria-pressed="isSelectedDay(dayDate)"
             class="base-calendar-table__day"
             :class="{
               'base-calendar-table__day--selected': isSelectedDay(dayDate),
             }"
-            :disabled="isDisabledDay(dayDate)"
             @click="$emit('click-day', dayDate)"
           >
             {{ dayDate.getDate() }}
@@ -77,15 +80,22 @@ export default {
     isSundayWeek() {
       return SUNDAY_WEEK_LOCALES.includes(this.locale);
     },
-    /** Индекс текущего месяца */
+    /** Индекс отображаемого месяца */
     currentMonthIndex() {
       return this.currentMonthDate.getMonth();
     },
+    selectedMonthIndex() {
+      return this.selectedDayDate.getMonth();
+    },
     /** Форматтер сокращённых названий дней недели */
-    weekdayFormatter() {
+    weekdayShortFormatter() {
       return new Intl.DateTimeFormat(this.locale, { weekday: "short" });
     },
-    /** Сокращённые наименования дней недели */
+    /** Форматтер полных названий дней недели */
+    weekdayLongFormatter() {
+      return new Intl.DateTimeFormat(this.locale, { weekday: "long" });
+    },
+    /** Сокращённые и полные наименования дней недели */
     weekdays() {
       const weekdays = [];
 
@@ -98,7 +108,10 @@ export default {
       ) {
         const date = new Date(MONDAY_DATE);
         date.setDate(date.getDate() + daysFromMonday - sundayWeekCorrection);
-        weekdays.push(this.weekdayFormatter.format(date));
+        weekdays.push({
+          short: this.weekdayShortFormatter.format(date),
+          long: this.weekdayLongFormatter.format(date),
+        });
       }
 
       return weekdays;
@@ -114,6 +127,7 @@ export default {
       const mondayWeekCorrection = +!this.isSundayWeek;
       return this.firstMonthDayDate.getDay() - mondayWeekCorrection;
     },
+    /** Номер последнего дня месяца */
     lastMonthDayNumber() {
       const date = new Date(this.currentMonthDate);
       date.setMonth(date.getMonth() + 1);
@@ -161,11 +175,22 @@ export default {
   methods: {
     /** Флаг выбранного дня */
     isSelectedDay(dayDate) {
-      return dayDate.toDateString() === this.selectedDayDate.toDateString();
+      return (
+        this.selectedMonthIndex === this.currentMonthIndex &&
+        dayDate.toDateString() === this.selectedDayDate.toDateString()
+      );
     },
     /** Флаг дня соседнего месяца */
     isDisabledDay(dayDate) {
       return dayDate.getMonth() !== this.currentMonthIndex;
+    },
+    /** Таб-индекс дня (выбранный или первый) */
+    getTabIndex(dayDate) {
+      return this.isSelectedDay(dayDate) ||
+        (this.selectedMonthIndex !== this.currentMonthIndex &&
+          dayDate.getDate() === 1)
+        ? 0
+        : -1;
     },
   },
 };
@@ -204,7 +229,7 @@ export default {
   color: var(--background-color);
 }
 
-.base-calendar-table__day--selected {
+.base-calendar-table__day--selected:not(:focus) {
   outline: 1px solid var(--active-color);
   cursor: default;
 }
