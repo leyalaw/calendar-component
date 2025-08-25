@@ -97,6 +97,8 @@ export default {
         ? new Date(this.initialDateString)
         : new Date();
 
+      if (isNaN(initialDate.getTime())) return;
+
       this.selectedDayDate = initialDate;
       this.currentMonthDate = initialDate;
     },
