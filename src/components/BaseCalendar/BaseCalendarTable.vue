@@ -252,11 +252,15 @@ export default {
 
 .base-calendar-table__day {
   width: 100%;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
 }
 
 .base-calendar-table__day:disabled {
   color: #ccc;
+}
+
+.base-calendar-table__day {
+  border: 1px solid transparent;
 }
 
 .base-calendar-table__day:hover:not(:disabled):not(
@@ -266,8 +270,8 @@ export default {
   color: var(--background-color);
 }
 
-.base-calendar-table__day--selected:not(:focus) {
-  outline: 1px solid var(--active-color);
+.base-calendar-table__day--selected {
+  border-color: var(--active-color);
   cursor: default;
 }
 </style>
