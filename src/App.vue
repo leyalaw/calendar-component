@@ -1,7 +1,13 @@
 <template>
   <main class="container">
     <!-- Простой информационный блок -->
-    <header class="header">
+    <header class="info">
+      <!-- ввод даты -->
+      <form @submit.prevent="initialDateString = dateString">
+        <input v-model="dateString" type="text" placeholder="YYYY-MM-DD" />
+        <button type="submit">></button>
+      </form>
+      <!-- выбор локали -->
       <select v-model="currentLocaleCode">
         <option
           v-for="locale in LOCALES"
@@ -11,12 +17,14 @@
           {{ locale.name }}
         </option>
       </select>
+      <!-- отображение выбранной даты -->
       <p tabindex="0">{{ formattedSelectedDate }}</p>
     </header>
     <!-- Календарь -->
     <BaseCalendarComponent
-      @select="selectedDate = $event"
       :locale="currentLocaleCode"
+      :initial-date-string="initialDateString"
+      @select="selectedDate = $event"
     />
   </main>
 </template>
@@ -44,6 +52,10 @@ export default {
       currentLocaleCode: LOCALE.US.code,
       /** Выбранная дата */
       selectedDate: null,
+      /** Строка даты */
+      dateString: "",
+      /** Исходная строка даты */
+      initialDateString: "",
     };
   },
   /* -------------------------------- Computed -------------------------------- */
@@ -69,9 +81,28 @@ export default {
   font-size: 1.6rem;
 }
 
-.header {
+.info {
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   margin-bottom: 2rem;
+}
+
+.info form {
+  width: 100%;
+}
+
+.info form input {
+  border-bottom: 1px solid black;
+}
+
+.info form input::placeholder {
+  color: #ccc;
+  font-size: 1.2rem;
+}
+
+.info form button {
+  font-weight: bold;
+  padding: 0.8rem;
 }
 </style>
